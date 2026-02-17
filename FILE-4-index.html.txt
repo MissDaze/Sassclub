@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sassy Vintage Tees - Pre-Order Now</title>
+    
+    <!-- Stripe.js -->
+    <script src="https://js.stripe.com/v3/"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            line-height: 1.6;
+        }
+
+        header {
+            background: #000;
+            padding: 1rem 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 2px solid #ff1744;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff1744, #ff4081);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .cart-icon {
+            position: relative;
+            font-size: 1.5rem;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff1744;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .hero {
+            padding: 3rem 1.5rem;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            text-align: center;
+        }
+
+        .preorder-banner {
+            background: linear-gradient(135deg, #ff1744, #ff4081);
+            padding: 0.75rem;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 900;
+            line-height: 1.2;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #ff1744, #ff4081);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: #ccc;
+            margin-bottom: 0.5rem;
+        }
+
+        .delivery-info {
+            color: #ff4081;
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #ff1744, #ff4081);
+            color: #fff;
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .shop-section {
+            padding: 2rem 1.5rem;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            font-weight: 900;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: #999;
+            margin-bottom: 2rem;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .filter-tab {
+            padding: 0.6rem 1.5rem;
+            background: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .filter-tab.active {
+            background: #ff1744;
+            border-color: #ff1744;
+        }
+
+        .product-grid {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .product-card {
+            background: #1a1a1a;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid #2a2a2a;
+            position: relative;
+        }
+
+        .preorder-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff1744;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        .product-image-container {
+            width: 100%;
+            height: 350px;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .product-info {
+            padding: 1.5rem;
+        }
+
+        .product-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-quote {
+            color: #ff4081;
+            font-style: italic;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .shipping-estimate {
+            color: #999;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .size-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .size-option {
+            flex: 1;
+            padding: 0.6rem;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .size-option.selected {
+            background: #ff1744;
+            border-color: #ff1744;
+        }
+
+        .add-to-cart {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #ff1744, #ff4081);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .add-to-cart:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .about-section {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            padding: 3rem 1.5rem;
+            margin: 3rem 0;
+            text-align: center;
+        }
+
+        .about-content h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .about-content p {
+            color: #ccc;
+            line-height: 1.8;
+        }
+
+        footer {
+            background: #000;
+            padding: 2rem 1.5rem;
+            border-top: 2px solid #ff1744;
+        }
+
+        .footer-section {
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            color: #ff4081;
+            margin-bottom: 1rem;
+        }
+
+        .copyright {
+            text-align: center;
+            color: #666;
+            padding-top: 1rem;
+            border-top: 1px solid #222;
+        }
+
+        @media (min-width: 768px) {
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .product-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- PRE-ORDER BANNER -->
+    <div class="preorder-banner">
+        🔥 PRE-ORDER NOW - Ships in 3-4 Weeks! 🔥
+    </div>
+
+    <header>
+        <nav>
+            <div class="logo">SASSY VINTAGE</div>
+            <div class="cart-icon">
+                🛒
+                <span class="cart-count">0</span>
+            </div>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Speak Your Mind<br><span class="gradient-text">Wear Your Attitude</span></h1>
+            <p>Vintage vibes with modern sass. Because polite is overrated.</p>
+            <p class="delivery-info">✨ Pre-Order Now - Expected Delivery: March 2026</p>
+            <a href="#shop" class="cta-button">Pre-Order Now</a>
+        </div>
+    </section>
+
+    <section class="shop-section" id="shop">
+        <h2 class="section-title">Pre-Order The Collection</h2>
+        <p class="section-subtitle">Sassy statements for every mood - Shipping March 2026</p>
+
+        <div class="filter-tabs">
+            <div class="filter-tab active" data-filter="all">All</div>
+            <div class="filter-tab" data-filter="boss">Boss Mode</div>
+            <div class="filter-tab" data-filter="savage">Savage</div>
+            <div class="filter-tab" data-filter="zero">Zero F*cks</div>
+        </div>
+
+        <div class="product-grid">
+            <!-- Product 1 -->
+            <div class="product-card" data-category="zero">
+                <div class="preorder-badge">PRE-ORDER</div>
+                <div class="product-image-container">
+                    <img src="./img1.png" class="product-image" alt="Karma Tee">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">The Karma Tee</h3>
+                    <p class="product-quote">"Y'all say karma is a b*tch, most you ain't even met me"</p>
+                    <div class="product-price">$32.99</div>
+                    <p class="shipping-estimate">Ships: March 2026</p>
+                    <div class="size-selector" data-product="karma">
+                        <div class="size-option" data-size="S">S</div>
+                        <div class="size-option" data-size="M">M</div>
+                        <div class="size-option selected" data-size="L">L</div>
+                        <div class="size-option" data-size="XL">XL</div>
+                    </div>
+                    <button class="add-to-cart" data-product="karma" data-price="3299">
+                        Pre-Order Now 🔥
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product 2 -->
+            <div class="product-card" data-category="savage">
+                <div class="preorder-badge">PRE-ORDER</div>
+                <div class="product-image-container">
+                    <img src="./img2.png" class="product-image" alt="Buttercup">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">The Buttercup</h3>
+                    <p class="product-quote">"Suck it up, buttercup"</p>
+                    <div class="product-price">$32.99</div>
+                    <p class="shipping-estimate">Ships: March 2026</p>
+                    <div class="size-selector" data-product="buttercup">
+                        <div class="size-option" data-size="S">S</div>
+                        <div class="size-option" data-size="M">M</div>
+                        <div class="size-option selected" data-size="L">L</div>
+                        <div class="size-option" data-size="XL">XL</div>
+                    </div>
+                    <button class="add-to-cart" data-product="buttercup" data-price="3299">
+                        Pre-Order Now 🔥
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product 3 -->
+            <div class="product-card" data-category="zero">
+                <div class="preorder-badge">PRE-ORDER</div>
+                <div class="product-image-container">
+                    <img src="./img3.png" class="product-image" alt="Zero Care Dark">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">Zero Care - Dark</h3>
+                    <p class="product-quote">"Oh well ain't you cute, you think I give a f*ck"</p>
+                    <div class="product-price">$32.99</div>
+                    <p class="shipping-estimate">Ships: March 2026</p>
+                    <div class="size-selector" data-product="zero-dark">
+                        <div class="size-option" data-size="S">S</div>
+                        <div class="size-option" data-size="M">M</div>
+                        <div class="size-option selected" data-size="L">L</div>
+                        <div class="size-option" data-size="XL">XL</div>
+                    </div>
+                    <button class="add-to-cart" data-product="zero-dark" data-price="3299">
+                        Pre-Order Now 🔥
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product 4 -->
+            <div class="product-card" data-category="zero">
+                <div class="preorder-badge">PRE-ORDER</div>
+                <div class="product-image-container">
+                    <img src="./img4.png" class="product-image" alt="Zero Care Light">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">Zero Care - Light</h3>
+                    <p class="product-quote">"Oh well ain't you cute, you think I give a f*ck"</p>
+                    <div class="product-price">$32.99</div>
+                    <p class="shipping-estimate">Ships: March 2026</p>
+                    <div class="size-selector" data-product="zero-light">
+                        <div class="size-option" data-size="S">S</div>
+                        <div class="size-option" data-size="M">M</div>
+                        <div class="size-option selected" data-size="L">L</div>
+                        <div class="size-option" data-size="XL">XL</div>
+                    </div>
+                    <button class="add-to-cart" data-product="zero-light" data-price="3299">
+                        Pre-Order Now 🔥
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product 5 -->
+            <div class="product-card" data-category="boss">
+                <div class="preorder-badge">PRE-ORDER</div>
+                <div class="product-image-container">
+                    <img src="./img5.png" class="product-image" alt="Boss Move">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">The Boss Move</h3>
+                    <p class="product-quote">"You sir, are a piece of sh*t"</p>
+                    <div class="product-price">$32.99</div>
+                    <p class="shipping-estimate">Ships: March 2026</p>
+                    <div class="size-selector" data-product="boss">
+                        <div class="size-option" data-size="S">S</div>
+                        <div class="size-option" data-size="M">M</div>
+                        <div class="size-option selected" data-size="L">L</div>
+                        <div class="size-option" data-size="XL">XL</div>
+                    </div>
+                    <button class="add-to-cart" data-product="boss" data-price="3299">
+                        Pre-Order Now 🔥
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="about-section">
+        <div class="about-content">
+            <h2>Unapologetically <span class="gradient-text">You</span></h2>
+            <p>We believe in speaking your truth, owning your attitude, and looking damn good while doing it. Our vintage-inspired designs combine classic aesthetics with modern sass—because being polite is overrated and your wardrobe should reflect your personality.</p>
+            <p style="margin-top: 1.5rem; color: #ff4081; font-weight: 600;">Pre-order now and be among the first to rock these exclusive designs!</p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-section">
+            <h3>Join the Sass Squad</h3>
+            <p style="color: #999;">Pre-order now and get 15% off your first order + exclusive drops</p>
+        </div>
+        <div class="copyright">
+            <p>© 2026 Sassy Vintage Tees. Stay sassy. ✨</p>
+        </div>
+    </footer>
+
+    <script>
+        // ============================================
+        // STRIPE CONFIGURATION
+        // ============================================
+        // REPLACE THIS WITH YOUR STRIPE PUBLISHABLE KEY
+        // Get it from: https://dashboard.stripe.com/apikeys
+        const STRIPE_PUBLISHABLE_KEY = 'pk_test_YOUR_KEY_HERE';
+        
+        // Initialize Stripe
+        const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+        
+        let cartCount = 0;
+        
+        // Size selection
+        document.querySelectorAll('.size-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                this.parentElement.querySelectorAll('.size-option').forEach(o => {
+                    o.classList.remove('selected');
+                });
+                this.classList.add('selected');
+            });
+        });
+
+        // Add to cart / Stripe Checkout
+        document.querySelectorAll('.add-to-cart').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const productName = this.dataset.product;
+                const priceInCents = parseInt(this.dataset.price);
+                
+                // Get selected size
+                const sizeSelector = this.parentElement.querySelector('.size-selector');
+                const selectedSize = sizeSelector.querySelector('.size-option.selected').dataset.size;
+                
+                // Disable button
+                this.disabled = true;
+                this.textContent = 'Processing...';
+                
+                try {
+                    // Call the API endpoint (same server, so no need for full URL)
+                    const response = await fetch('/api/create-checkout-session', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            product: productName,
+                            size: selectedSize,
+                            price: priceInCents
+                        })
+                    });
+                    
+                    const session = await response.json();
+                    
+                    // Redirect to Stripe Checkout
+                    const result = await stripe.redirectToCheckout({
+                        sessionId: session.id
+                    });
+                    
+                    if (result.error) {
+                        alert(result.error.message);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Payment system not yet configured. Please add your Stripe keys!');
+                }
+                
+                // Re-enable button
+                this.disabled = false;
+                this.textContent = 'Pre-Order Now 🔥';
+            });
+        });
+
+        // Filter functionality
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                const filter = this.dataset.filter;
+                document.querySelectorAll('.product-card').forEach(card => {
+                    card.style.display = (filter === 'all' || card.dataset.category === filter) ? 'block' : 'none';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
